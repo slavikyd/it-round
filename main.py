@@ -5,7 +5,7 @@ import sys
 class Editor(QWidget):
 	def __init__(self):
 		super(Editor, self).__init__()
-		self.setWindowTitle('Fast notes')
+		self.setWindowTitle('Fast Notes')
 		self.resize(600, 500)
 	
 		self.textEditor = QTextEdit()
@@ -20,11 +20,16 @@ class Editor(QWidget):
 		self.btnMenu.clicked.connect(lambda:self.openDlg())
 		
 		self.btnCopy = QPushButton('📄')
+		self.btnCopy.clicked.connect(lambda:self.textEditor.copy())
 		self.btnPaste = QPushButton('📋')
+		self.btnPaste.clicked.connect(lambda:self.textEditor.paste())
 		self.btnCut = QPushButton('✂️')
+		self.btnPaste.clicked.connect(lambda:self.textEditor.cut())
 
 		self.btnUndo = QPushButton('⬅')
+		self.btnUndo.clicked.connect(lambda:self.textEditor.undo())
 		self.btnRedo = QPushButton('➡')
+		self.btnUndo.clicked.connect(lambda:self.textEditor.redo())
 
 		UndoRedoLayout = QHBoxLayout()
 		UndoRedoLayout.addWidget(self.btnUndo)
@@ -51,7 +56,7 @@ class Editor(QWidget):
 		
 
 		self.setLayout(MainLayout)
-	
+
 	def newOnClick(self):
 		self.textEditor.clear()
 
