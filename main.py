@@ -5,7 +5,7 @@ import sys
 class Editor(QWidget):
 	def __init__(self):
 		super(Editor, self).__init__()
-		self.setWindowTitle('Fast Notes')
+		self.setWindowTitle('Fast notes')
 		self.resize(600, 500)
 	
 		self.textEditor = QTextEdit()
@@ -17,7 +17,7 @@ class Editor(QWidget):
 		self.btnSave.clicked.connect(lambda:self.saveDlg())
 		
 		self.btnMenu = QPushButton('Назад в меню...') 
-		self.btnMenu.clicked.connect(lambda:self.menuOnClick())
+		self.btnMenu.clicked.connect(lambda:self.openDlg())
 		
 		self.btnCopy = QPushButton('📄')
 		self.btnPaste = QPushButton('📋')
@@ -51,8 +51,11 @@ class Editor(QWidget):
 		
 
 		self.setLayout(MainLayout)
+	
+	def newOnClick(self):
+		self.textEditor.clear()
 
-	def saveOnClick(self, dlg:QDialog, format:int, name:str):
+	def saveOnClick(self, format:int, name:str):
 		formats = ['txt', 'md', 'html']
 		try:
 			with open(f'{name}.{formats[format]}', 'w') as f:
@@ -67,10 +70,56 @@ class Editor(QWidget):
 				else:
 					f.write(self.textEditor.toPlainText())
 	
-	def menuOnClick(self):
-		self.textEditor.setPlainText('Выход в меню')
-	def newOnClick(self):
-		self.textEditor.clear()
+	def openOnClick(self, format:int, name:str):
+		formats = ['txt', 'md', 'html']
+		file = f'{name}.{formats[format]}'
+		try:
+			with open(f'{name}.{formats[format]}') as f:
+				self.textEditor.setPlainText(f.read())
+		except Exception:
+			dlg = QDialog()
+			label = QLabel('Файла не существует')
+			layout = QVBoxLayout()
+			layout.addWidget(label)
+			dlg.setLayout(layout)
+			dlg.exec_()
+
+	def openDlg(self):
+		dlg = QDialog(self)
+		dlg.setWindowTitle('Открыть файл...')
+	
+		infoLabel1 = QLabel('Введите название файла: ')
+		infoLabel2 = QLabel('Выберите формат файла: ')
+		
+		inputName = QLineEdit()
+		self.setFormat = QComboBox()
+		btnExit = QPushButton('Отменить')
+		btnApply = QPushButton('Открыть')
+		dlgLayout = QVBoxLayout()
+		inputLayout = QHBoxLayout()
+		formatLayout = QHBoxLayout()
+		buttonsLayout = QHBoxLayout()
+
+		self.setFormat.addItems(['Обычный текст (.txt)', 'Markdown-файл (.md)', 'HTML-документ (.html)'])
+
+		btnExit.clicked.connect(lambda:dlg.reject())
+		btnApply.clicked.connect(lambda:self.openOnClick(self.setFormat.currentIndex(), inputName.text()))
+
+		buttonsLayout.addWidget(btnExit)
+		buttonsLayout.addWidget(btnApply)
+
+		inputLayout.addWidget(infoLabel1)
+		inputLayout.addWidget(inputName)
+
+		formatLayout.addWidget(infoLabel2)
+		formatLayout.addWidget(self.setFormat)
+
+		dlgLayout.addLayout(inputLayout)
+		dlgLayout.addLayout(formatLayout)
+		dlgLayout.addLayout(buttonsLayout)
+	
+		dlg.setLayout(dlgLayout)
+		dlg.exec_()
 
 	def saveDlg(self):
 		dlg = QDialog(self)
@@ -91,7 +140,7 @@ class Editor(QWidget):
 		self.setFormat.addItems(['Обычный текст (.txt)', 'Markdown-файл (.md)', 'HTML-документ (.html)'])
 
 		btnExit.clicked.connect(lambda:dlg.reject())
-		btnApply.clicked.connect(lambda:self.saveOnClick(dlg, self.setFormat.currentIndex(), inputName.text()))
+		btnApply.clicked.connect(lambda:self.saveOnClick(self.setFormat.currentIndex(), inputName.text()))
 
 		buttonsLayout.addWidget(btnExit)
 		buttonsLayout.addWidget(btnApply)
@@ -108,7 +157,6 @@ class Editor(QWidget):
 	
 		dlg.setLayout(dlgLayout)
 		dlg.exec_()
-		self.textEditor.setPlainText('Сохранено')
 
 app = QApplication(sys.argv)
 win = Editor()
